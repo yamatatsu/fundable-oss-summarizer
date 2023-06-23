@@ -8,7 +8,7 @@ export type Result = Record<string, number>;
 export function countByFundingUrl(
   dependencies: Record<string, FundData>,
 ): Result {
-  return countBy(flattenAndFilter(dependencies));
+  return count(flattenAndFilter(dependencies));
 }
 
 /**
@@ -31,12 +31,10 @@ function flattenAndFilter(
   );
 }
 
-function countBy(
-  arr: string[],
-): Record<string, number> {
+function count(arr: string[]): Result {
   return arr.reduce(
     (acc, str) => ({ ...acc, [str]: (acc[str] ?? 0) + 1 }),
-    {} as Record<string, number>,
+    {} as Result,
   );
 }
 
