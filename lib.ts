@@ -5,35 +5,39 @@ export type FundData = {
 type Funding = { url: string };
 export type Result = Record<string, number>;
 
-export function summaryRecords(
-  acc: Result,
+export function countByFundingUrl(
   dependencies: Record<string, FundData>,
-  parent?: FundData,
 ): Result {
-  return Object.values(dependencies).reduce<Result>(
-    (_acc, fundData) => summaryFundData(_acc, fundData, parent),
-    acc,
+  return countBy(flattenAndFilter(dependencies));
+}
+
+/**
+ * flatten dependencies and filter it that is used by same maintainer
+ * @param dependencies
+ * @param parentUrl
+ * @returns
+ */
+function flattenAndFilter(
+  dependencies?: Record<string, FundData>,
+  parentUrl?: string,
+): string[] {
+  if (!dependencies) return [];
+  return Object.values(dependencies).flatMap(
+    (fundData) => {
+      const url = getFundingUrl(fundData);
+      const flattened = flattenAndFilter(fundData.dependencies, url);
+      return url === parentUrl ? flattened : [url, ...flattened];
+    },
   );
 }
 
-function summaryFundData(
-  acc: Result,
-  fundData: FundData,
-  parent?: FundData,
-): Result {
-  const _acc = fundData.dependencies
-    ? summaryRecords(acc, fundData.dependencies, fundData)
-    : acc;
-
-  const url = getFundingUrl(fundData);
-
-  if (parent && url === getFundingUrl(parent)) {
-    return _acc;
-  }
-
-  const count = (_acc[url] ?? 0) + 1;
-
-  return { ..._acc, [url]: count };
+function countBy(
+  arr: string[],
+): Record<string, number> {
+  return arr.reduce(
+    (acc, str) => ({ ...acc, [str]: (acc[str] ?? 0) + 1 }),
+    {} as Record<string, number>,
+  );
 }
 
 function getFundingUrl(fundData: FundData): string {

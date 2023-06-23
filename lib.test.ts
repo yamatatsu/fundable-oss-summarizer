@@ -1,8 +1,8 @@
 import { assertEquals } from "https://deno.land/std@0.177.0/testing/asserts.ts";
-import { summaryRecords } from "./lib.ts";
+import { countByFundingUrl } from "./lib.ts";
 
 Deno.test("count Funding", () => {
-  const result = summaryRecords({}, {
+  const result = countByFundingUrl({
     ownerA_lib1: { funding: { url: "https://example.com/ownerA1" } },
     ownerA_lib2: {
       funding: [{ url: "https://example.com/ownerA1" }, {
